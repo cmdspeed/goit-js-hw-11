@@ -2,24 +2,40 @@ import Notiflix from 'notiflix';
 
 const API_KEY = '34526750-6567dd272390bb315b269666f';
 const API_URL = 'https://pixabay.com/api/';
-let q = 'dog';
-const URLSearch = `${API_URL}?key=${API_KEY}&q=${q}&image_type=photo&orientation=horizontal&safesearch=true`;
+let numberPage = 0;
+let URLSearch;
 
 const form = document.querySelector('.search-form');
-const input = document.querySelector('[name="searchQuery"]');
+const input = document.querySelector('input[name="searchQuery"]');
 const search = document.querySelector('button[type="submit"]');
 const gallery = document.querySelector('.gallery');
+const loadBtn = document.querySelector('.load-more');
+
+search.addEventListener('click', event => {
+  event.preventDefault();
+  q = input.value;
+  numberPage = 1;
+  URLSearch = `${API_URL}?key=${API_KEY}&q=${q}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${numberPage}`;
+
+  resetList();
+  fetchPhoto();
+  loadMore();
+});
 
 const fetchPhoto = async () => {
   try {
     const firstResponse = await fetch(`${URLSearch}`);
     const array = await firstResponse.json();
+    const totalHits = array.totalHits;
 
     if (array.total === 0) {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
+      return;
     }
+
+    Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
 
     const photos = array.hits
       .map(
@@ -52,9 +68,27 @@ const fetchPhoto = async () => {
       .join('');
 
     gallery.insertAdjacentHTML('beforeend', photos);
+
+    if (numberPage > totalHits / 40) {
+      loadBtn.classList.add('hidden');
+      Notiflix.Notify.info(
+        "We're sorry, but you've reached the end of search results."
+      );
+    }
   } catch (error) {
     console.log(error);
   }
 };
 
-fetchPhoto();
+const resetList = () => {
+  gallery.innerHTML = '';
+};
+
+const loadMore = () => {
+  loadBtn.classList.remove('hidden');
+};
+loadBtn.addEventListener('click', () => {
+  numberPage++;
+  URLSearch = `${API_URL}?key=${API_KEY}&q=${q}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${numberPage}`;
+  fetchPhoto();
+});
