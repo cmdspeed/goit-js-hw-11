@@ -1,15 +1,21 @@
 import Notiflix from 'notiflix';
-
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 const API_KEY = '34526750-6567dd272390bb315b269666f';
 const API_URL = 'https://pixabay.com/api/';
 let numberPage = 0;
-let URLSearch;
+let URLSearch, q;
 
 const form = document.querySelector('.search-form');
 const input = document.querySelector('input[name="searchQuery"]');
 const search = document.querySelector('button[type="submit"]');
 const gallery = document.querySelector('.gallery');
 const loadBtn = document.querySelector('.load-more');
+const lighboxGallery = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: '250',
+  captionPosition: 'bottom',
+});
 
 search.addEventListener('click', event => {
   event.preventDefault();
@@ -27,7 +33,6 @@ const fetchPhoto = async () => {
     const firstResponse = await fetch(`${URLSearch}`);
     const array = await firstResponse.json();
     const totalHits = array.totalHits;
-
     if (array.total === 0) {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
