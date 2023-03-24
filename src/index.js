@@ -11,11 +11,6 @@ const input = document.querySelector('input[name="searchQuery"]');
 const search = document.querySelector('button[type="submit"]');
 const gallery = document.querySelector('.gallery');
 const loadBtn = document.querySelector('.load-more');
-const lighboxGallery = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
-  captionDelay: '250',
-  captionPosition: 'bottom',
-});
 
 search.addEventListener('click', event => {
   event.preventDefault();
@@ -45,13 +40,14 @@ const fetchPhoto = async () => {
     const photos = array.hits
       .map(
         ({
+          largeImageURL,
           webformatURL,
           tags,
           likes,
           views,
           comments,
           downloads,
-        }) => `    <div class="photo-card">
+        }) => `    <a class="gallery-link" href="${largeImageURL}"><div class="photo-card">
   <img src="${webformatURL}" alt="${tags}" loading="lazy" />
   <div class="info">
     <p class="info-item">
@@ -68,11 +64,18 @@ const fetchPhoto = async () => {
     </p>
   </div>
 </div>
+</a>
             `
       )
       .join('');
 
     gallery.insertAdjacentHTML('beforeend', photos);
+
+    new SimpleLightbox('.gallery a', {
+      captionsData: 'alt',
+      captionDelay: '250',
+      captionPosition: 'bottom',
+    });
 
     if (numberPage > totalHits / 40) {
       loadBtn.classList.add('hidden');

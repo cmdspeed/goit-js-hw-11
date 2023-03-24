@@ -7,13 +7,15 @@
   gap: 20;
   flex-wrap: wrap;
   margin: 0 10px;
+  justify-content: center;
 }
 
 .photo-card {
-  flex-basis: calc((100% - 3 * 20px) / 4);
+  object-fit: cover;
   margin: 0 auto;
   & img {
     display: block;
-    width: 100%;
+    width: 500px;
+    height: 320px;
   }
 }
