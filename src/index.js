@@ -4,7 +4,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const API_KEY = '34526750-6567dd272390bb315b269666f';
 const API_URL = 'https://pixabay.com/api/';
 let numberPage = 0;
-let URLSearch, q;
+let URLSearch, q, noMorePhotos;
 
 const form = document.querySelector('.search-form');
 const input = document.querySelector('input[name="searchQuery"]');
@@ -31,6 +31,9 @@ search.addEventListener('click', event => {
 
 const fetchPhoto = async () => {
   try {
+    if (noMorePhotos) {
+      return;
+    }
     const firstResponse = await fetch(`${URLSearch}`);
     const array = await firstResponse.json();
     const totalHits = array.totalHits;
@@ -43,11 +46,7 @@ const fetchPhoto = async () => {
     if (numberPage === 1) {
       Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
     }
-
-    if (noMorePhoto(numberPage, totalHits)) {
-      return;
-    }
-
+    noMorePhoto(numberPage, totalHits);
     createGallery(array);
 
     simplelightbox.refresh();
@@ -67,6 +66,7 @@ const fetchPhoto = async () => {
 
 const resetList = () => {
   gallery.innerHTML = '';
+  noMorePhotos = false;
 };
 
 const createGallery = array => {
@@ -117,6 +117,6 @@ const noMorePhoto = (numberPage, totalHits) => {
     Notiflix.Notify.info(
       "We're sorry, but you've reached the end of search results."
     );
-    return true;
+    noMorePhotos = true;
   }
 };
