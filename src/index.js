@@ -47,20 +47,20 @@ const fetchPhoto = async () => {
           views,
           comments,
           downloads,
-        }) => `    <a class="gallery-link" href="${largeImageURL}"><div class="photo-card">
+        }) => `    <a class="gallery__link" href="${largeImageURL}"><div class="photo-card">
   <img src="${webformatURL}" alt="${tags}" loading="lazy" />
   <div class="info">
     <p class="info-item">
-      <b>Likes: ${likes}</b>
+      <b>Likes: </b> ${likes}
     </p>
     <p class="info-item">
-      <b>Views: ${views}</b>
+      <b>Views: </b> ${views}
     </p>
     <p class="info-item">
-      <b>Comments: ${comments}</b>
+      <b>Comments: </b> ${comments}
     </p>
     <p class="info-item">
-      <b>Downloads: ${downloads}</b>
+      <b>Downloads: </b>${downloads}
     </p>
   </div>
 </div>
@@ -72,9 +72,7 @@ const fetchPhoto = async () => {
     gallery.insertAdjacentHTML('beforeend', photos);
 
     new SimpleLightbox('.gallery a', {
-      captionsData: 'alt',
       captionDelay: '250',
-      captionPosition: 'bottom',
     });
 
     if (numberPage > totalHits / 40) {
