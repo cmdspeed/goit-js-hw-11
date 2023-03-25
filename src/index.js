@@ -11,16 +11,22 @@ const input = document.querySelector('input[name="searchQuery"]');
 const search = document.querySelector('button[type="submit"]');
 const gallery = document.querySelector('.gallery');
 const loadBtn = document.querySelector('.load-more');
+const simplelightbox = new SimpleLightbox('.gallery a', {
+  captionDelay: '250',
+});
 
 search.addEventListener('click', event => {
   event.preventDefault();
   q = input.value;
-  numberPage = 1;
+  numberPage = 0;
   URLSearch = `${API_URL}?key=${API_KEY}&q=${q}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${numberPage}`;
-
+  new ScrollWatch({
+    watch: 'a',
+    infiniteScroll: true,
+    infiniteOffset: 200,
+    onInfiniteYInView: loadMore,
+  });
   resetList();
-  fetchPhoto();
-  loadMore();
 });
 
 const fetchPhoto = async () => {
@@ -34,20 +40,44 @@ const fetchPhoto = async () => {
       );
       return;
     }
+    if (numberPage === 1) {
+      Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+    }
 
-    Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+    createGallery(array);
 
-    const photos = array.hits
-      .map(
-        ({
-          largeImageURL,
-          webformatURL,
-          tags,
-          likes,
-          views,
-          comments,
-          downloads,
-        }) => `    <a class="gallery__link" href="${largeImageURL}"><div class="photo-card">
+    simplelightbox.refresh();
+
+    const { height: cardHeight } = document
+      .querySelector('.gallery')
+      .firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: 'smooth',
+    });
+    noMorePhoto(numberPage, totalHits);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const resetList = () => {
+  gallery.innerHTML = '';
+};
+
+const createGallery = array => {
+  const photos = array.hits
+    .map(
+      ({
+        largeImageURL,
+        webformatURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => `    <a class="gallery__link" href="${largeImageURL}"><div class="photo-card">
   <img src="${webformatURL}" alt="${tags}" loading="lazy" />
   <div class="info">
     <p class="info-item">
@@ -66,44 +96,23 @@ const fetchPhoto = async () => {
 </div>
 </a>
             `
-      )
-      .join('');
+    )
+    .join('');
 
-    gallery.insertAdjacentHTML('beforeend', photos);
-
-    new SimpleLightbox('.gallery a', {
-      captionDelay: '250',
-    });
-
-    const { height: cardHeight } = document
-      .querySelector('.gallery')
-      .firstElementChild.getBoundingClientRect();
-
-    window.scrollBy({
-      top: cardHeight * 2,
-      behavior: 'smooth',
-    });
-
-    if (numberPage > totalHits / 40) {
-      loadBtn.classList.add('hidden');
-      Notiflix.Notify.info(
-        "We're sorry, but you've reached the end of search results."
-      );
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const resetList = () => {
-  gallery.innerHTML = '';
+  gallery.insertAdjacentHTML('beforeend', photos);
 };
 
 const loadMore = () => {
-  loadBtn.classList.remove('hidden');
-};
-loadBtn.addEventListener('click', () => {
   numberPage++;
   URLSearch = `${API_URL}?key=${API_KEY}&q=${q}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${numberPage}`;
   fetchPhoto();
-});
+};
+
+const noMorePhoto = (numberPage, totalHits) => {
+  if (numberPage > totalHits / 40) {
+    loadBtn.classList.add('hidden');
+    Notiflix.Notify.info(
+      "We're sorry, but you've reached the end of search results."
+    );
+  }
+};
