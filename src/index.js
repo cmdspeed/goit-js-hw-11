@@ -75,6 +75,15 @@ const fetchPhoto = async () => {
       captionDelay: '250',
     });
 
+    const { height: cardHeight } = document
+      .querySelector('.gallery')
+      .firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: 'smooth',
+    });
+
     if (numberPage > totalHits / 40) {
       loadBtn.classList.add('hidden');
       Notiflix.Notify.info(
