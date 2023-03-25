@@ -17,6 +17,7 @@ const simplelightbox = new SimpleLightbox('.gallery a', {
 
 search.addEventListener('click', event => {
   event.preventDefault();
+  resetList();
   q = input.value;
   numberPage = 0;
   URLSearch = `${API_URL}?key=${API_KEY}&q=${q}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${numberPage}`;
@@ -26,7 +27,6 @@ search.addEventListener('click', event => {
     infiniteOffset: 200,
     onInfiniteYInView: loadMore,
   });
-  resetList();
 });
 
 const fetchPhoto = async () => {
@@ -44,6 +44,10 @@ const fetchPhoto = async () => {
       Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
     }
 
+    if (noMorePhoto(numberPage, totalHits)) {
+      return;
+    }
+
     createGallery(array);
 
     simplelightbox.refresh();
@@ -56,7 +60,6 @@ const fetchPhoto = async () => {
       top: cardHeight * 2,
       behavior: 'smooth',
     });
-    noMorePhoto(numberPage, totalHits);
   } catch (error) {
     console.log(error);
   }
@@ -114,5 +117,6 @@ const noMorePhoto = (numberPage, totalHits) => {
     Notiflix.Notify.info(
       "We're sorry, but you've reached the end of search results."
     );
+    return true;
   }
 };
